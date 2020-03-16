@@ -1,0 +1,871 @@
+"apiVersion": |-
+  argoproj.io/v1alpha1
+"kind": |-
+  Workflow
+"metadata":
+  "annotations":
+    "pipelines.kubeflow.org/pipeline_spec": |-
+      {"description": "Clone volume before training", "inputs": [{"default": "", "name": "ontapClusterMgmtHostname", "optional": true}, {"default": "", "name": "ontapClusterAdminUsername", "optional": true}, {"default": "", "name": "ontapClusterAdminPassword", "optional": true}, {"default": "", "name": "sourceVolumeName", "optional": true}], "name": "NetOps trainign pipeline with NetApp volume cloning"}
+  "generateName": |-
+    netops-trainign-pipeline-with-netapp-volume-cloning-
+"spec":
+  "arguments":
+    "parameters":
+    - "name": |-
+        ontapClusterMgmtHostname
+      "value": ""
+    - "name": |-
+        ontapClusterAdminUsername
+      "value": ""
+    - "name": |-
+        ontapClusterAdminPassword
+      "value": ""
+    - "name": |-
+        sourceVolumeName
+      "value": ""
+  "entrypoint": |-
+    netops-trainign-pipeline-with-netapp-volume-cloning
+  "serviceAccountName": |-
+    pipeline-runner
+  "templates":
+  - "container":
+      "command":
+      - |-
+        python
+      - |-
+        -m
+      - |-
+        mlrun
+      - |-
+        run
+      - |-
+        --kfp
+      - |-
+        --from-env
+      - |-
+        --workflow
+      - |-
+        {{workflow.uid}}
+      - |-
+        --name
+      - |-
+        clone
+      - |-
+        -p
+      - |-
+        ontapClusterMgmtHostname={{inputs.parameters.ontapClusterMgmtHostname}}
+      - |-
+        -p
+      - |-
+        ontapClusterAdminUsername={{inputs.parameters.ontapClusterAdminUsername}}
+      - |-
+        -p
+      - |-
+        ontapClusterAdminPassword={{inputs.parameters.ontapClusterAdminPassword}}
+      - |-
+        -p
+      - |-
+        FEATURES_TABLE=netops_features_parquet
+      - |-
+        -p
+      - |-
+        sourceVolumeName={{inputs.parameters.sourceVolumeName}}
+      - |-
+        -p
+      - |-
+        NETAPP_SIM=True
+      - |-
+        -p
+      - |-
+        NETAPP_MOUNT_PATH=/netapp
+      - |-
+        -o
+      - |-
+        cloneVolumeDetails
+      - |-
+        -o
+      - |-
+        training_parquet_file
+      - |-
+        --handler
+      - |-
+        handler
+      - |-
+        --runtime
+      - |-
+        {'kind': 'job', 'metadata': {'name': 'clone', 'tag': '', 'project': 'NetApp'}, 'spec': {'command': '', 'args': [], 'image': 'docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/netapp/pipeline:latest', 'volumes': [{'flexVolume': {'driver': 'v3io/fuse', 'options': {'accessKey': '24d076c0-f71b-498c-9ad4-f90260cc0af0', 'container': 'users', 'subPath': '/admin'}}, 'name': 'v3io'}, {'name': 'nfs-pvc', 'persistentVolumeClaim': {'claimName': 'basic'}}], 'volume_mounts': [{'mountPath': '/User', 'name': 'v3io'}, {'mountPath': '/netapp', 'name': 'nfs-pvc'}], 'env': [{'name': 'V3IO_API', 'value': 'v3io-webapi.default-tenant.svc:8081'}, {'name': 'V3IO_USERNAME', 'value': 'admin'}, {'name': 'V3IO_ACCESS_KEY', 'value': '24d076c0-f71b-498c-9ad4-f90260cc0af0'}], 'description': '', 'build': {'functionSourceCode': 'IyBHZW5lcmF0ZWQgYnkgbnVjbGlvLmV4cG9ydC5OdWNsaW9FeHBvcnRlciBvbiAyMDIwLTAzLTE2IDE2OjQ3Cgpmcm9tIG1scnVuIGltcG9ydCBnZXRfb3JfY3JlYXRlX2N0eCwgbWxjb25mCmZyb20gbWxydW4uYXJ0aWZhY3RzIGltcG9ydCBUYWJsZUFydGlmYWN0Cgpmcm9tIG5ldGFwcF9vbnRhcCBpbXBvcnQgY29uZmlnIGFzIG5ldGFwcENvbmZpZwpmcm9tIG5ldGFwcF9vbnRhcC5ob3N0X2Nvbm5lY3Rpb24gaW1wb3J0IEhvc3RDb25uZWN0aW9uIGFzIE5ldEFwcEhvc3RDb25uZWN0aW9uCmZyb20gbmV0YXBwX29udGFwLnJlc291cmNlcyBpbXBvcnQgVm9sdW1lLCBTbmFwc2hvdApmcm9tIG5ldGFwcF9vbnRhcCBpbXBvcnQgY29uZmlnLCB1dGlscwoKZnJvbSBkYXRldGltZSBpbXBvcnQgZGF0ZXRpbWUKaW1wb3J0IGpzb24KaW1wb3J0IHN5cywgc3VicHJvY2VzcwppbXBvcnQgb3MKCmRlZiBuZXRhcHBDbG9uZSgKICAgIGNvbnRleHQsCiAgICBvbnRhcENsdXN0ZXJNZ210SG9zdG5hbWUsCiAgICBvbnRhcENsdXN0ZXJBZG1pblVzZXJuYW1lLAogICAgb250YXBDbHVzdGVyQWRtaW5QYXNzd29yZCwKICAgIHNvdXJjZVZvbHVtZU5hbWUsCiAgICB2ZXJpZnlTU0xDZXJ0Cik6CiAgICAKICAgIGlzX3NpbXVsYXRlZCA9IGNvbnRleHQuZ2V0X3BhcmFtKCdORVRBUFBfU0lNJyxGYWxzZSkKICAgIE5FVEFQUF9NT1VOVF9QQVRIID0gY29udGV4dC5nZXRfcGFyYW0oJ05FVEFQUF9NT1VOVF9QQVRIJywnL1VzZXIvbmZzJykKICAgIHByaW50KCJTSU1VTEFURUQiLGlzX3NpbXVsYXRlZCxvbnRhcENsdXN0ZXJNZ210SG9zdG5hbWUsY29udGV4dCkKICAgIGlmIGlzX3NpbXVsYXRlZDoKICAgICAgICBjbG9uZV9wYXRoID0gb3MucGF0aC5qb2luKE5FVEFQUF9NT1VOVF9QQVRILCJjbG9uZSIpCiAgICAgICAgY29udGV4dC5sb2dfcmVzdWx0KCdjbG9uZVZvbHVtZURldGFpbHMnLGNsb25lX3BhdGgpCiAgICAgICAgY29udGV4dC5sb2dnZXIuaW5mbygnQ2xvbmUgdm9sdW1lIG5hbWU6ICVzJyVjbG9uZV9wYXRoKQogICAgICAgIHJldHVybiBjbG9uZV9wYXRoCiAgICBwcmludCgiPT09PT4iLG9udGFwQ2x1c3Rlck1nbXRIb3N0bmFtZSkKICAgIG5ldGFwcENvbmZpZy5DT05ORUNUSU9OID0gTmV0QXBwSG9zdENvbm5lY3Rpb24oCiAgICAgICAgaG9zdCA9IG9udGFwQ2x1c3Rlck1nbXRIb3N0bmFtZSwKICAgICAgICB1c2VybmFtZSA9IG9udGFwQ2x1c3RlckFkbWluVXNlcm5hbWUsCiAgICAgICAgcGFzc3dvcmQgPSBvbnRhcENsdXN0ZXJBZG1pblBhc3N3b3JkLAogICAgICAgIHZlcmlmeSA9IHZlcmlmeVNTTENlcnQKICAgICkKICAgCiAgICAKICAgIGNvbnRleHQubG9nZ2VyLmluZm8oJ1NvdXJjZSBPTlRBUCB2b2x1bWUgbmFtZTogJXMnJXNvdXJjZVZvbHVtZU5hbWUpCiAKICAgIAogICAgc291cmNlVm9sdW1lID0gVm9sdW1lLmZpbmQobmFtZSA9IHNvdXJjZVZvbHVtZU5hbWUsd29ya2luZ0Vudmlyb25tZW50PSJkZW1vIikKICAgIHRpbWVzdGFtcCA9IGRhdGV0aW1lLnRvZGF5KCkuc3RyZnRpbWUoIiVZJW0lZF8lSCVNJVMiKQogICAgY2xvbmVWb2x1bWVOYW1lID0gJ2tmcF9jbG9uZV8lcycgJSB0aW1lc3RhbXAKICAgIGNsb25lVm9sdW1lID0gVm9sdW1lLmZyb21fZGljdCh7CiAgICAgICAgJ25hbWUnOiBjbG9uZVZvbHVtZU5hbWUsCiAgICAgICAgJ3N2bSc6IHNvdXJjZVZvbHVtZS50b19kaWN0KClbJ3N2bSddLAogICAgICAgICdjbG9uZSc6IHsKICAgICAgICAgICAgJ2lzX2ZsZXhjbG9uZSc6J3RydWUnLAogICAgICAgICAgICAncGFyZW50X3ZvbHVtZSc6IHNvdXJjZVZvbHVtZS50b19kaWN0KCkKICAgICAgICB9LAogICAgICAgICduYXMnOiB7CiAgICAgICAgICAgICdwYXRoJzogJy8lcycgJSBjbG9uZVZvbHVtZU5hbWUKICAgICAgICB9CiAgICB9KQogICAgcmVzcG9uc2UgPSBjbG9uZVZvbHVtZS5wb3N0KCkKICAgIHByaW50KCJcbkFQSSBSZXNwb25zZToiKQogICAgcHJpbnQocmVzcG9uc2UuaHR0cF9yZXNwb25zZS50ZXh0KQogCiAgICBjbG9uZVZvbHVtZS5nZXQoKQogCiAgICBjbG9uZVZvbHVtZURldGFpbHMgPSBjbG9uZVZvbHVtZS50b19kaWN0KCkKICAgIHByaW50KCJcbkNsb25lIFZvbHVtZSBEZXRhaWxzOiIpCiAgICBwcmludChqc29uLmR1bXBzKGNsb25lVm9sdW1lRGV0YWlscywgaW5kZW50PTIpKQogCiAgICBjbG9uZV9wYXRoID0gb3MucGF0aC5qb2luKE5FVEFQUF9NT1VOVF9QQVRILGNsb25lVm9sdW1lRGV0YWlsc1snbmFtZSddKQogICAgY29udGV4dC5sb2dfcmVzdWx0KCdjbG9uZVZvbHVtZURldGFpbHMnLGNsb25lX3BhdGgpCiAgICByZXR1cm4gY2xvbmVfcGF0aAoKZGVmIGdldF9sYXRlc3RfZGF0YXNldChjb250ZXh0LGNsb25lX3BhdGgpOgogICAgZmVhdHVyZXNfdGFibGU9b3MucGF0aC5qb2luKGNsb25lX3BhdGgsY29udGV4dC5nZXRfcGFyYW0oJ0ZFQVRVUkVTX1RBQkxFJywgJ25ldG9wc19mZWF0dXJlcycpKQogICAgbXBhdGggPSBbb3MucGF0aC5qb2luKGZlYXR1cmVzX3RhYmxlLCBmaWxlKSBmb3IgZmlsZSBpbiBvcy5saXN0ZGlyKGZlYXR1cmVzX3RhYmxlKV0KICAgIAogICAgbGF0ZXN0ID0gbWF4KG1wYXRoLCBrZXk9b3MucGF0aC5nZXRtdGltZSkKICAgIGNvbnRleHQubG9nX3Jlc3VsdCgndHJhaW5pbmdfcGFycXVldF9maWxlJyxsYXRlc3QpCiAgICBjb250ZXh0LmxvZ2dlci5kZWJ1ZyhmJ1JlYWRpbmcgZGF0YSBmcm9tOiB7bGF0ZXN0fScpCiAgICAKICAgIHJldHVybiAiIgoKZGVmIGhhbmRsZXIoY29udGV4dCwKICAgIG9udGFwQ2x1c3Rlck1nbXRIb3N0bmFtZSAgPSAnbG9jYWxob3N0JywKICAgIG9udGFwQ2x1c3RlckFkbWluVXNlcm5hbWUgPSAnYWRtaW4nLAogICAgb250YXBDbHVzdGVyQWRtaW5QYXNzd29yZCA9ICdOZXRBcHAhMjMnLAogICAgc291cmNlVm9sdW1lTmFtZSA9ICd0cmlkZW50X2RlZmF1bHRfdGVuYW50X2Jhc2ljXzA4MjA0JywKICAgIHZlcmlmeVNTTENlcnQ6IGJvb2wgPSBGYWxzZQopOgogICAgY2xvbmVfcGF0aCAgPSBuZXRhcHBDbG9uZShjb250ZXh0LG9udGFwQ2x1c3Rlck1nbXRIb3N0bmFtZSxvbnRhcENsdXN0ZXJBZG1pblVzZXJuYW1lLG9udGFwQ2x1c3RlckFkbWluUGFzc3dvcmQsc291cmNlVm9sdW1lTmFtZSx2ZXJpZnlTU0xDZXJ0KQogICAgCiAgICBnZXRfbGF0ZXN0X2RhdGFzZXQoY29udGV4dCxjbG9uZV9wYXRoKQogICAgCiAgICAKICAgIAoK', 'commands': [], 'code_origin': 'clone.ipynb'}}}
+      - |-
+        --image
+      - |-
+        docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/netapp/pipeline:latest
+      - ""
+      "env":
+      - "name": |-
+          MLRUN_DBPATH
+        "value": |-
+          http://mlrun-api:8080
+      - "name": |-
+          V3IO_API
+        "value": |-
+          v3io-webapi.default-tenant.svc:8081
+      - "name": |-
+          V3IO_USERNAME
+        "value": |-
+          admin
+      - "name": |-
+          V3IO_ACCESS_KEY
+        "value": |-
+          24d076c0-f71b-498c-9ad4-f90260cc0af0
+      "image": |-
+        mlrun/mlrun:0.4.5
+      "volumeMounts":
+      - "mountPath": |-
+          /User
+        "name": |-
+          v3io
+    "inputs":
+      "parameters":
+      - "name": |-
+          ontapClusterAdminPassword
+      - "name": |-
+          ontapClusterAdminUsername
+      - "name": |-
+          ontapClusterMgmtHostname
+      - "name": |-
+          sourceVolumeName
+    "name": |-
+      clone
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /mlpipeline-ui-metadata.json
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /mlpipeline-metrics.json
+      - "name": |-
+          clone-cloneVolumeDetails
+        "path": |-
+          /tmp/cloneVolumeDetails
+      - "name": |-
+          clone-training_parquet_file
+        "path": |-
+          /tmp/training_parquet_file
+      "parameters":
+      - "name": |-
+          clone-cloneVolumeDetails
+        "valueFrom":
+          "path": |-
+            /tmp/cloneVolumeDetails
+      - "name": |-
+          clone-training_parquet_file
+        "valueFrom":
+          "path": |-
+            /tmp/training_parquet_file
+    "volumes":
+    - "flexVolume":
+        "driver": |-
+          v3io/fuse
+        "options":
+          "accessKey": |-
+            24d076c0-f71b-498c-9ad4-f90260cc0af0
+          "container": |-
+            users
+          "subPath": |-
+            /admin
+      "name": |-
+        v3io
+  - "container":
+      "command":
+      - |-
+        python
+      - |-
+        -m
+      - |-
+        mlrun
+      - |-
+        run
+      - |-
+        --kfp
+      - |-
+        --from-env
+      - |-
+        --workflow
+      - |-
+        {{workflow.uid}}
+      - |-
+        --name
+      - |-
+        data-prep
+      - |-
+        -p
+      - |-
+        FEATURES_TABLE=netops_features_parquet
+      - |-
+        -p
+      - |-
+        SAVE_TO=models
+      - |-
+        -p
+      - |-
+        metrics_table=netops_metrics_parquet
+      - |-
+        -p
+      - |-
+        FROM_TSDB=0
+      - |-
+        -p
+      - |-
+        PREDICTIONS_TABLE=netops_predictions
+      - |-
+        -p
+      - |-
+        TRAIN_ON_LAST=1d
+      - |-
+        -p
+      - |-
+        TRAIN_SIZE=0.7
+      - |-
+        -p
+      - |-
+        NUMBER_OF_SHARDS=4
+      - |-
+        -p
+      - |-
+        MODEL_FILENAME=netops.v3.model.pickle
+      - |-
+        -p
+      - |-
+        APP_DIR=/User/netops
+      - |-
+        -p
+      - |-
+        FUNCTION_NAME=netops-inference
+      - |-
+        -p
+      - |-
+        PROJECT_NAME=netops
+      - |-
+        -p
+      - |-
+        NETAPP_SIM=True
+      - |-
+        -p
+      - |-
+        NETAPP_MOUNT_PATH=/netapp
+      - |-
+        -p
+      - |-
+        NETAPP_PVC_CLAIM=basic
+      - |-
+        -p
+      - |-
+        IGZ_CONTAINER_PATH=/users/admin
+      - |-
+        -p
+      - |-
+        IGZ_MOUNT_PATH=/User
+      - |-
+        -i
+      - |-
+        DATA_DIR={{inputs.parameters.clone-cloneVolumeDetails}}
+      - |-
+        --handler
+      - |-
+        handler
+      - |-
+        --runtime
+      - |-
+        {'kind': 'job', 'metadata': {'name': 'data-prep', 'tag': '', 'project': 'NetApp'}, 'spec': {'command': '', 'args': [], 'image': 'docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp', 'volumes': [{'flexVolume': {'driver': 'v3io/fuse', 'options': {'accessKey': '24d076c0-f71b-498c-9ad4-f90260cc0af0', 'container': 'users', 'subPath': '/admin'}}, 'name': 'v3io'}, {'name': 'nfs-pvc', 'persistentVolumeClaim': {'claimName': 'basic'}}], 'volume_mounts': [{'mountPath': '/User', 'name': 'v3io'}, {'mountPath': '/netapp', 'name': 'nfs-pvc'}], 'env': [{'name': 'V3IO_API', 'value': 'v3io-webapi.default-tenant.svc:8081'}, {'name': 'V3IO_USERNAME', 'value': 'admin'}, {'name': 'V3IO_ACCESS_KEY', 'value': '24d076c0-f71b-498c-9ad4-f90260cc0af0'}], 'description': '', 'build': {'functionSourceCode': 'IyBHZW5lcmF0ZWQgYnkgbnVjbGlvLmV4cG9ydC5OdWNsaW9FeHBvcnRlciBvbiAyMDIwLTAzLTE2IDE2OjQ3CgppbXBvcnQgb3MKaW1wb3J0IHRpbWUKaW1wb3J0IHBhbmRhcyBhcyBwZAppbXBvcnQgaXRlcnRvb2xzCgppbXBvcnQgdjNpb19mcmFtZXMgYXMgdjNmCgppbXBvcnQgZGFzay5kYXRhZnJhbWUgYXMgZGQKZnJvbSBkYXNrLmRpc3RyaWJ1dGVkIGltcG9ydCBDbGllbnQKZnJvbSBtbHJ1biBpbXBvcnQgZ2V0X29yX2NyZWF0ZV9jdHgKCm1scnVuY29udGV4dCA9IGdldF9vcl9jcmVhdGVfY3R4KCdkYXRhLXByZXAnKQoKCgpkYXNrID0gQ2xpZW50KCkKCgpzaGFyZHMgPSAgaW50KG1scnVuY29udGV4dC5nZXRfcGFyYW0oJ05VTUJFUl9PRl9TSEFSRFMnLCA0KSkKCmlzX3NhdmVfdG9fdHNkYiA9IChpbnQobWxydW5jb250ZXh0LmdldF9wYXJhbSgnU0FWRV9UT19UU0RCJywgMSkpID09IDEpCgptZXRyaWNzX3RhYmxlID0gb3MucGF0aC5qb2luKHN0cihtbHJ1bmNvbnRleHQuZ2V0X2lucHV0KCdEQVRBX0RJUicpKSxtbHJ1bmNvbnRleHQuZ2V0X3BhcmFtKCdtZXRyaWNzX3RhYmxlJywgJ25ldG9wc19tZXRyaWNzJykpCgpmZWF0dXJlc190YWJsZSA9ICBvcy5wYXRoLmpvaW4oc3RyKG1scnVuY29udGV4dC5nZXRfaW5wdXQoJ0RBVEFfRElSJykpLG1scnVuY29udGV4dC5nZXRfcGFyYW0oJ0ZFQVRVUkVTX1RBQkxFJywgJ25ldG9wc19mZWF0dXJlcycpKQoKCgpmaWxlcGF0aCA9IG9zLnBhdGguam9pbihmZWF0dXJlc190YWJsZSkKaWYgbm90IG9zLnBhdGguZXhpc3RzKGZpbGVwYXRoKToKICAgIG9zLm1ha2VkaXJzKGZpbGVwYXRoKQoKZGVmIGZvcm1hdF9kZl9mcm9tX3RzZGIoY29udGV4dCwgZGYpOgogICAgZGYuaW5kZXgubmFtZXMgPSBbJ3RpbWVzdGFtcCcsICdjb21wYW55JywgJ2RhdGFfY2VudGVyJywgJ2RldmljZSddCiAgICBkZiA9IGRmLnJlc2V0X2luZGV4KCkKICAgIGRmID0gZGQuZnJvbV9wYW5kYXMoZGYsIG5wYXJ0aXRpb25zPXNoYXJkcykKICAgIHJldHVybiBkZgoKZGVmIGdldF9kYXRhX3BhcnF1ZXQoKToKICAgIG1wYXRoID0gW29zLnBhdGguam9pbihtZXRyaWNzX3RhYmxlLCBmaWxlKSBmb3IgZmlsZSBpbiBvcy5saXN0ZGlyKG1ldHJpY3NfdGFibGUpXQogICAgCiAgICBsYXRlc3QgPSBtYXgobXBhdGgsIGtleT1vcy5wYXRoLmdldG10aW1lKQogICAgCiAgICBkZiA9IHBkLnJlYWRfcGFycXVldChsYXRlc3QpCiAgICBkZiA9IGZvcm1hdF9kZl9mcm9tX3RzZGIoY29udGV4dCwgZGYpCiAgICByZXR1cm4gZGYKCmRlZiBjcmVhdGVfcm9sbGluZ19mZWF0dWVycyhkZiwgd2luZG93X3NpemU6IGludCk6CiAgICBmZWF0dXJlcyA9IGRmLmNvcHkoKQogICAgZmVhdHVyZXNbJ2tleSddID0gZmVhdHVyZXMuYXBwbHkobGFtYmRhIHJvdzogZid7cm93WyJjb21wYW55Il19X3tyb3dbImRhdGFfY2VudGVyIl19X3tyb3dbImRldmljZSJdfScsIGF4aXM9MSwgbWV0YT1mZWF0dXJlcy5jb21wdXRlKCkuZHR5cGVzKQogICAgZmVhdHVyZXMuc2V0X2luZGV4KCdrZXknKQogICAgZmVhdHVyZXNbImNwdV91dGlsaXphdGlvbiJdID0gZmVhdHVyZXMuY3B1X3V0aWxpemF0aW9uLnJvbGxpbmcod2luZG93PXdpbmRvd19zaXplKS5tZWFuKCkKICAgIGZlYXR1cmVzWyJsYXRlbmN5Il0gPSBmZWF0dXJlcy5sYXRlbmN5LnJvbGxpbmcod2luZG93PXdpbmRvd19zaXplKS5tZWFuKCkKICAgIGZlYXR1cmVzWyJwYWNrZXRfbG9zcyJdID0gZmVhdHVyZXMucGFja2V0X2xvc3Mucm9sbGluZyh3aW5kb3c9d2luZG93X3NpemUpLm1lYW4oKQogICAgZmVhdHVyZXNbInRocm91Z2hwdXQiXSA9IGZlYXR1cmVzLnRocm91Z2hwdXQucm9sbGluZyh3aW5kb3c9d2luZG93X3NpemUpLm1lYW4oKQogICAgZmVhdHVyZXNbImlzX2Vycm9yIl0gPSBmZWF0dXJlcy5pc19lcnJvci5yb2xsaW5nKHdpbmRvdz13aW5kb3dfc2l6ZSkubWF4KCkKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgZmVhdHVyZXMgPSBmZWF0dXJlcy5kcm9wbmEoKQogICAgZmVhdHVyZXMgPSBmZWF0dXJlcy5kcm9wX2R1cGxpY2F0ZXMoKQoKICAgIHJldHVybiBmZWF0dXJlcwoKZGVmIHNldF9pbmRleGVzKGRmKToKICAgIGRmID0gZGYuc2V0X2luZGV4KFsndGltZXN0YW1wJywgJ2NvbXBhbnknLCAnZGF0YV9jZW50ZXInLCAnZGV2aWNlJ10pCiAgICByZXR1cm4gZGYKCmRlZiBzYXZlX3RvX3BhcnF1ZXQoZGY6IHBkLkRhdGFGcmFtZSk6CiAgICBwcmludCgnU2F2aW5nIGZlYXR1cmVzIHRvIFBhcnF1ZXQnKQogICAgCiAgICBkZiA9IGRmLnJlc2V0X2luZGV4KCkKICAgIGRmWyd0aW1lc3RhbXAnXSA9IGRmLmxvY1s6LCAndGltZXN0YW1wJ10uYXN0eXBlKCdkYXRldGltZTY0W21zXScpCiAgICAKICAgIGRmPSBzZXRfaW5kZXhlcyhkZikKICAgIAogICAgZmlyc3RfdGltZXN0YW1wID0gZGYuaW5kZXhbMF1bMF0uc3RyZnRpbWUoJyVZJW0lZFQlSCVNJVMnKQogICAgbGFzdF90aW1lc3RhbXAgPSBkZi5pbmRleFstMV1bMF0uc3RyZnRpbWUoJyVZJW0lZFQlSCVNJVMnKQogICAgZmlsZW5hbWUgPSBmaXJzdF90aW1lc3RhbXAgKyAnLScgKyBsYXN0X3RpbWVzdGFtcCArICcucGFycXVldCcKICAgIGZpbGVwYXRoID0gb3MucGF0aC5qb2luKGZlYXR1cmVzX3RhYmxlLCBmaWxlbmFtZSkKICAgIHdpdGggb3BlbihmaWxlcGF0aCwgJ3diKycpIGFzIGY6CiAgICAgICAgZGYudG9fcGFycXVldChmKQoKZGVmIGhhbmRsZXIoY29udGV4dCk6CiAgICByYXcgPSBnZXRfZGF0YV9wYXJxdWV0KCkgCiAgICAgICAgCiAgICBtaW51dGUgPSBjcmVhdGVfcm9sbGluZ19mZWF0dWVycyhyYXcsIDMpCiAgICBjb2x1bW5fbmFtZXMgPSB7J2NwdV91dGlsaXphdGlvbic6ICdjcHVfdXRpbGl6YXRpb25fbWludXRlbHknLAogICAgICAgICAgICAgICAgICAgICdsYXRlbmN5JzogJ2xhdGVuY3lfbWludXRlbHknLAogICAgICAgICAgICAgICAgICAgICdwYWNrZXRfbG9zcyc6ICdwYWNrZXRfbG9zc19taW51dGVseScsCiAgICAgICAgICAgICAgICAgICAgJ3Rocm91Z2hwdXQnOiAndGhyb3VnaHB1dF9taW51dGVseSd9CiAgICBtaW51dGUgPSBtaW51dGUucmVuYW1lKGNvbHVtbnM9Y29sdW1uX25hbWVzKQogICAgCiAgICBob3VyID0gY3JlYXRlX3JvbGxpbmdfZmVhdHVlcnMocmF3LCAzKjYwKQogICAgY29sdW1uX25hbWVzID0geydjcHVfdXRpbGl6YXRpb24nOiAnY3B1X3V0aWxpemF0aW9uX2hvdXJseScsCiAgICAgICAgICAgICAgICAgICAgJ2xhdGVuY3knOiAnbGF0ZW5jeV9ob3VybHknLAogICAgICAgICAgICAgICAgICAgICdwYWNrZXRfbG9zcyc6ICdwYWNrZXRfbG9zc19ob3VybHknLAogICAgICAgICAgICAgICAgICAgICd0aHJvdWdocHV0JzogJ3Rocm91Z2hwdXRfaG91cmx5J30KICAgIGhvdXIgPSBob3VyLnJlbmFtZShjb2x1bW5zPWNvbHVtbl9uYW1lcykKICAgIAogICAgZmVhdHVyZXNfcm0gPSByYXcubWVyZ2UobWludXRlLCBvbj1bJ3RpbWVzdGFtcCcsICdjb21wYW55JywgJ2RhdGFfY2VudGVyJywgJ2RldmljZSddLCBzdWZmaXhlcz0oJ19yYXcnLCAnX21pbnV0ZScpKQogICAgZmVhdHVyZXNfcm0uY29tcHV0ZSgpCiAgICAKICAgIGZlYXR1cmVzID0gZmVhdHVyZXNfcm0ubWVyZ2UoaG91ciwgb249Wyd0aW1lc3RhbXAnLCAnY29tcGFueScsICdkYXRhX2NlbnRlcicsICdkZXZpY2UnXSwgc3VmZml4ZXM9KCdfcmF3JywgJ19ob3VybHknKSkKICAgIGZlYXR1cmVzID0gZmVhdHVyZXMuY29tcHV0ZSgpCiAgICAKICAgIAogICAgZmVhdHVyZXMgPSBmZWF0dXJlcy5yZXNldF9pbmRleChkcm9wPVRydWUpCiAgICBmZWF0dXJlX2NvbHMgPSBbY29sIGZvciBjb2wgaW4gZmVhdHVyZXMuY29sdW1ucyBpZiAna2V5JyBpbiBjb2xdCiAgICBmZWF0dXJlcyA9IGZlYXR1cmVzLmRyb3AoZmVhdHVyZV9jb2xzLCBheGlzPTEpCiAgICAKICAgIAogICAgZmVhdHVyZXMgPSBmZWF0dXJlcy5zZXRfaW5kZXgoWyd0aW1lc3RhbXAnLCAnY29tcGFueScsICdkYXRhX2NlbnRlcicsICdkZXZpY2UnXSkKICAgIAogICAgc2F2ZV90b19wYXJxdWV0KGZlYXR1cmVzKQoK', 'commands': [], 'code_origin': 'data-prep.ipynb'}}}
+      - |-
+        --out-path
+      - |-
+        v3io:///users/admin/mlrun/kfp/{{workflow.uid}}/
+      - |-
+        --image
+      - |-
+        docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp
+      - ""
+      "env":
+      - "name": |-
+          MLRUN_DBPATH
+        "value": |-
+          http://mlrun-api:8080
+      - "name": |-
+          V3IO_API
+        "value": |-
+          v3io-webapi.default-tenant.svc:8081
+      - "name": |-
+          V3IO_USERNAME
+        "value": |-
+          admin
+      - "name": |-
+          V3IO_ACCESS_KEY
+        "value": |-
+          24d076c0-f71b-498c-9ad4-f90260cc0af0
+      "image": |-
+        mlrun/mlrun:0.4.5
+      "volumeMounts":
+      - "mountPath": |-
+          /User
+        "name": |-
+          v3io
+    "inputs":
+      "parameters":
+      - "name": |-
+          clone-cloneVolumeDetails
+    "name": |-
+      data-prep
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /mlpipeline-ui-metadata.json
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /mlpipeline-metrics.json
+    "volumes":
+    - "flexVolume":
+        "driver": |-
+          v3io/fuse
+        "options":
+          "accessKey": |-
+            24d076c0-f71b-498c-9ad4-f90260cc0af0
+          "container": |-
+            users
+          "subPath": |-
+            /admin
+      "name": |-
+        v3io
+  - "container":
+      "command":
+      - |-
+        python
+      - |-
+        -m
+      - |-
+        mlrun
+      - |-
+        run
+      - |-
+        --kfp
+      - |-
+        --from-env
+      - |-
+        --workflow
+      - |-
+        {{workflow.uid}}
+      - |-
+        --name
+      - |-
+        deploy-model
+      - |-
+        -p
+      - |-
+        FEATURES_TABLE=netops_features_parquet
+      - |-
+        -p
+      - |-
+        SAVE_TO=models
+      - |-
+        -p
+      - |-
+        metrics_table=netops_metrics_parquet
+      - |-
+        -p
+      - |-
+        FROM_TSDB=0
+      - |-
+        -p
+      - |-
+        PREDICTIONS_TABLE=netops_predictions
+      - |-
+        -p
+      - |-
+        TRAIN_ON_LAST=1d
+      - |-
+        -p
+      - |-
+        TRAIN_SIZE=0.7
+      - |-
+        -p
+      - |-
+        NUMBER_OF_SHARDS=4
+      - |-
+        -p
+      - |-
+        MODEL_FILENAME=netops.v3.model.pickle
+      - |-
+        -p
+      - |-
+        APP_DIR=/User/netops
+      - |-
+        -p
+      - |-
+        FUNCTION_NAME=netops-inference
+      - |-
+        -p
+      - |-
+        PROJECT_NAME=netops
+      - |-
+        -p
+      - |-
+        NETAPP_SIM=True
+      - |-
+        -p
+      - |-
+        NETAPP_MOUNT_PATH=/netapp
+      - |-
+        -p
+      - |-
+        NETAPP_PVC_CLAIM=basic
+      - |-
+        -p
+      - |-
+        IGZ_CONTAINER_PATH=/users/admin
+      - |-
+        -p
+      - |-
+        IGZ_MOUNT_PATH=/User
+      - |-
+        -i
+      - |-
+        DATA_DIR={{inputs.parameters.clone-cloneVolumeDetails}}
+      - |-
+        --handler
+      - |-
+        handler
+      - |-
+        --runtime
+      - |-
+        {'kind': 'job', 'metadata': {'name': 'training', 'tag': '', 'project': 'NetApp'}, 'spec': {'command': '', 'args': [], 'image': 'docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp', 'volumes': [{'flexVolume': {'driver': 'v3io/fuse', 'options': {'accessKey': '24d076c0-f71b-498c-9ad4-f90260cc0af0', 'container': 'users', 'subPath': '/admin'}}, 'name': 'v3io'}, {'name': 'nfs-pvc', 'persistentVolumeClaim': {'claimName': 'basic'}}], 'volume_mounts': [{'mountPath': '/User', 'name': 'v3io'}, {'mountPath': '/netapp', 'name': 'nfs-pvc'}], 'env': [{'name': 'V3IO_API', 'value': 'v3io-webapi.default-tenant.svc:8081'}, {'name': 'V3IO_USERNAME', 'value': 'admin'}, {'name': 'V3IO_ACCESS_KEY', 'value': '24d076c0-f71b-498c-9ad4-f90260cc0af0'}], 'description': '', 'build': {'functionSourceCode': 'IyBHZW5lcmF0ZWQgYnkgbnVjbGlvLmV4cG9ydC5OdWNsaW9FeHBvcnRlciBvbiAyMDIwLTAzLTE2IDE2OjQ3CgppbXBvcnQgbnVjbGlvCmltcG9ydCBvcwpmcm9tIG1scnVuIGltcG9ydCBnZXRfb3JfY3JlYXRlX2N0eAoKY29udGV4dD1nZXRfb3JfY3JlYXRlX2N0eCgnZGVwbG95ZicpCgpORVRBUFBfTU9VTlRfUEFUSCA9IGNvbnRleHQuZ2V0X3BhcmFtKCdORVRBUFBfTU9VTlRfUEFUSCcpCk5FVEFQUF9QVkNfQ0xBSU0gPSBjb250ZXh0LmdldF9wYXJhbSgnTkVUQVBQX1BWQ19DTEFJTScpCklHWl9DT05UQUlORVJfUEFUSCA9IGNvbnRleHQuZ2V0X3BhcmFtKCdJR1pfQ09OVEFJTkVSX1BBVEgnKQpJR1pfTU9VTlRfUEFUSCA9IGNvbnRleHQuZ2V0X3BhcmFtKCdJR1pfTU9VTlRfUEFUSCcpCnNwZWMgPSBudWNsaW8uQ29uZmlnU3BlYyhjb25maWc9eyJzcGVjLnRyaWdnZXJzLmluZmVyZW5jZS5raW5kIjoiY3JvbiIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgInNwZWMudHJpZ2dlcnMuaW5mZXJlbmNlLmF0dHJpYnV0ZXMuaW50ZXJ2YWwiIDoiMWgiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJzcGVjLnJlYWRpbmVzc1RpbWVvdXRTZWNvbmRzIiA6IDM2MCB9LAogICAgICAgICAgICAgICAgICAgICAgICAgZW52PXsnRlJPTV9UU0RCJzogMCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnRkVBVFVSRVNfVEFCTEUnOiBjb250ZXh0LmdldF9wYXJhbSgnRkVBVFVSRVNfVEFCTEUnKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnUFJFRElDVElPTlNfVEFCTEUnOiBjb250ZXh0LmdldF9wYXJhbSgnUFJFRElDVElPTlNfVEFCTEUnKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnTU9ERUxfRklMRU5BTUUnIDogY29udGV4dC5nZXRfcGFyYW0oJ01PREVMX0ZJTEVOQU1FJyksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ0FQUF9ESVInIDogY29udGV4dC5nZXRfcGFyYW0oJ0FQUF9ESVInKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnREFUQV9ESVInIDogc3RyKGNvbnRleHQuZ2V0X2lucHV0KCdEQVRBX0RJUicpKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnU0FWRV9UTycgOiBjb250ZXh0LmdldF9wYXJhbSgnU0FWRV9UTycpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICAgICAgICAgICBjbWQ9WydwaXAgaW5zdGFsbCBweWFycm93IHBhbmRhcyB4Z2Jvb3N0IHNjaWtpdC1sZWFybj09MC4yMC4xJywncGlwIGluc3RhbGwgdjNpb19mcmFtZXMgLS11cGdyYWRlJ10sCiAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgKS53aXRoX3YzaW8oKS5hZGRfdm9sdW1lKElHWl9NT1VOVF9QQVRILElHWl9DT05UQUlORVJfUEFUSCxraW5kPSd2M2lvJyxuYW1lPSd2M2lvJykuYWRkX3ZvbHVtZShORVRBUFBfTU9VTlRfUEFUSCxORVRBUFBfUFZDX0NMQUlNLGtpbmQ9J3B2YycsbmFtZT0nbmV0YXBwJykKCmRlZiBoYW5kbGVyKGNvbnRleHQpOgogICAgYWRkciA9IG51Y2xpby5kZXBsb3lfZmlsZShzb3VyY2U9b3MucGF0aC5qb2luKGNvbnRleHQuZ2V0X3BhcmFtKCdBUFBfRElSJyksJ251Y2xpby1pbmZlcmVuY2UtZnVuY3Rpb24uaXB5bmInKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBuYW1lPWNvbnRleHQuZ2V0X3BhcmFtKCdGVU5DVElPTl9OQU1FJykscHJvamVjdD1jb250ZXh0LmdldF9wYXJhbSgnUFJPSkVDVF9OQU1FJyksdmVyYm9zZT1UcnVlLCBzcGVjPXNwZWMsIHRhZz0ndjEuMScpCgo=', 'commands': [], 'code_origin': 'deploy-inference-function.ipynb'}}}
+      - |-
+        --out-path
+      - |-
+        v3io:///users/admin/mlrun/kfp/{{workflow.uid}}/
+      - |-
+        --image
+      - |-
+        docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp
+      - ""
+      "env":
+      - "name": |-
+          MLRUN_DBPATH
+        "value": |-
+          http://mlrun-api:8080
+      - "name": |-
+          V3IO_API
+        "value": |-
+          v3io-webapi.default-tenant.svc:8081
+      - "name": |-
+          V3IO_USERNAME
+        "value": |-
+          admin
+      - "name": |-
+          V3IO_ACCESS_KEY
+        "value": |-
+          24d076c0-f71b-498c-9ad4-f90260cc0af0
+      "image": |-
+        mlrun/mlrun:0.4.5
+      "volumeMounts":
+      - "mountPath": |-
+          /User
+        "name": |-
+          v3io
+    "inputs":
+      "parameters":
+      - "name": |-
+          clone-cloneVolumeDetails
+    "name": |-
+      deploy-model
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /mlpipeline-ui-metadata.json
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /mlpipeline-metrics.json
+    "volumes":
+    - "flexVolume":
+        "driver": |-
+          v3io/fuse
+        "options":
+          "accessKey": |-
+            24d076c0-f71b-498c-9ad4-f90260cc0af0
+          "container": |-
+            users
+          "subPath": |-
+            /admin
+      "name": |-
+        v3io
+  - "container":
+      "command":
+      - |-
+        python
+      - |-
+        -m
+      - |-
+        mlrun
+      - |-
+        run
+      - |-
+        --kfp
+      - |-
+        --from-env
+      - |-
+        --workflow
+      - |-
+        {{workflow.uid}}
+      - |-
+        --name
+      - |-
+        describe
+      - |-
+        -p
+      - |-
+        key=summary
+      - |-
+        -p
+      - |-
+        label_column=is_error
+      - |-
+        -p
+      - |-
+        class_labels=[0, 1]
+      - |-
+        -i
+      - |-
+        table={{inputs.parameters.clone-training_parquet_file}}
+      - |-
+        --handler
+      - |-
+        describe
+      - |-
+        --runtime
+      - |-
+        {'kind': 'job', 'metadata': {'name': 'describe', 'tag': '', 'project': 'NetApp'}, 'spec': {'command': '', 'args': [], 'image': 'docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp', 'volumes': [{'flexVolume': {'driver': 'v3io/fuse', 'options': {'accessKey': '24d076c0-f71b-498c-9ad4-f90260cc0af0', 'container': 'users', 'subPath': '/admin'}}, 'name': 'v3io'}, {'name': 'nfs-pvc', 'persistentVolumeClaim': {'claimName': 'basic'}}], 'volume_mounts': [{'mountPath': '/User', 'name': 'v3io'}, {'mountPath': '/netapp', 'name': 'nfs-pvc'}], 'env': [{'name': 'V3IO_API', 'value': 'v3io-webapi.default-tenant.svc:8081'}, {'name': 'V3IO_USERNAME', 'value': 'admin'}, {'name': 'V3IO_ACCESS_KEY', 'value': '24d076c0-f71b-498c-9ad4-f90260cc0af0'}], 'description': '', 'build': {'functionSourceCode': 'IyBDb3B5cmlnaHQgMjAxOCBJZ3VhemlvCiMKIyBMaWNlbnNlZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgIkxpY2Vuc2UiKTsKIyB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCiMgWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0CiMKIyAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMAojCiMgVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzb2Z0d2FyZQojIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCiMgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiMgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGUgc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZAojIGxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgppbXBvcnQgb3MKaW1wb3J0IG51bXB5IGFzIG5wCmltcG9ydCBwYW5kYXMgYXMgcGQKaW1wb3J0IG1hdHBsb3RsaWIucHlwbG90IGFzIHBsdAppbXBvcnQgc2VhYm9ybiBhcyBzbnMKCmZyb20gbWxydW4uZXhlY3V0aW9uIGltcG9ydCBNTENsaWVudEN0eApmcm9tIG1scnVuLmRhdGFzdG9yZSBpbXBvcnQgRGF0YUl0ZW0KZnJvbSBtbHJ1bi5hcnRpZmFjdHMgaW1wb3J0IFBsb3RBcnRpZmFjdCwgVGFibGVBcnRpZmFjdAoKZnJvbSB5ZWxsb3dicmljay50YXJnZXQgaW1wb3J0IENsYXNzQmFsYW5jZQpmcm9tIHNrbGVhcm4ucHJlcHJvY2Vzc2luZyBpbXBvcnQgU3RhbmRhcmRTY2FsZXIKCmZyb20gdHlwaW5nIGltcG9ydCBJTywgQW55U3RyLCBVbmlvbiwgTGlzdCwgT3B0aW9uYWwKCnBkLnNldF9vcHRpb24oImRpc3BsYXkuZmxvYXRfZm9ybWF0IiwgbGFtYmRhIHg6ICIlLjJmIiAlIHgpCgpkZWYgX2djZl9jbGVhcihwbHQpOgogICAgcGx0LmNsYSgpCiAgICBwbHQuY2xmKCkKICAgIHBsdC5jbG9zZSgpIAoKZGVmIGRlc2NyaWJlKAogICAgY29udGV4dDogTUxDbGllbnRDdHgsCiAgICB0YWJsZTogVW5pb25bRGF0YUl0ZW0sIHN0cl0sCiAgICBsYWJlbF9jb2x1bW46IHN0ciwKICAgIGNsYXNzX2xhYmVsczogTGlzdFtzdHJdLAogICAga2V5OiBzdHIgPSAidGFibGUtc3VtbWFyeSIsCikgLT4gTm9uZToKICAgICIiIlN1bW1hcml6ZSBhIHRhYmxlCgogICAgVE9ETzogbWVyZ2Ugd2l0aCBkYXNrIHZlcnNpb24KCiAgICA6cGFyYW0gY29udGV4dDogICAgICAgICB0aGUgZnVuY3Rpb24gY29udGV4dAogICAgOnBhcmFtIHRhYmxlOiAgICAgICAgICAgcGFuZGFzIGRhdGFmcmFtZQogICAgOnBhcmFtIGtleTogICAgICAgICAgICAga2V5IG9mIHRhYmxlIHN1bW1hcnkgaW4gYXJ0aWZhY3Qgc3RvcmUKICAgICIiIgogICAgX2djZl9jbGVhcihwbHQpCiAgICAKICAgIGJhc2VfcGF0aCA9IGNvbnRleHQuYXJ0aWZhY3RfcGF0aAogICAgb3MubWFrZWRpcnMoYmFzZV9wYXRoLCBleGlzdF9vaz1UcnVlKQogICAgb3MubWFrZWRpcnMoYmFzZV9wYXRoKyIvcGxvdHMiLCBleGlzdF9vaz1UcnVlKQogICAgCiAgICBwcmludChmJ1RBQkxFIHt0YWJsZX0nKQogICAgdGFibGUgPSBwZC5yZWFkX3BhcnF1ZXQoc3RyKHRhYmxlKSkKICAgIGhlYWRlciA9IHRhYmxlLmNvbHVtbnMudmFsdWVzCiAgICAKICAgICMgZGVzY3JpYmUgdGFibGUKICAgIHN1bXRibCA9IHRhYmxlLmRlc2NyaWJlKCkKICAgIHN1bXRibCA9IHN1bXRibC5hcHBlbmQobGVuKHRhYmxlLmluZGV4KS10YWJsZS5jb3VudCgpLCBpZ25vcmVfaW5kZXg9VHJ1ZSkKICAgIHN1bXRibC5pbnNlcnQoMCwgIm1ldHJpYyIsIFsiY291bnQiLCAibWVhbiIsICJzdGQiLCAibWluIiwiMjUlIiwgIjUwJSIsICI3NSUiLCAibWF4IiwgIm5hbnMiXSkKICAgIAogICAgc3VtdGJsLnRvX2Nzdihvcy5wYXRoLmpvaW4oYmFzZV9wYXRoLCBrZXkrIi5jc3YiKSwgaW5kZXg9RmFsc2UpCiAgICBjb250ZXh0LmxvZ19hcnRpZmFjdChrZXksIGxvY2FsX3BhdGg9a2V5KyIuY3N2IikKCiAgICAjIHBsb3QgY2xhc3MgYmFsYW5jZSwgcmVjb3JkIHJlbGF0aXZlIGNsYXNzIHdlaWdodAogICAgX2djZl9jbGVhcihwbHQpCiAgICAKICAgIGxhYmVscyA9IHRhYmxlLnBvcChsYWJlbF9jb2x1bW4pCiAgICBjbGFzc19iYWxhbmNlX21vZGVsID0gQ2xhc3NCYWxhbmNlKGxhYmVscz1jbGFzc19sYWJlbHMpCiAgICBjbGFzc19iYWxhbmNlX21vZGVsLmZpdChsYWJlbHMpCiAgICAKICAgIHNjYWxlX3Bvc193ZWlnaHQgPSBjbGFzc19iYWxhbmNlX21vZGVsLnN1cHBvcnRfWzBdL2NsYXNzX2JhbGFuY2VfbW9kZWwuc3VwcG9ydF9bMV0KICAgICNjb250ZXh0LmxvZ19hcnRpZmFjdCgic2NhbGVfcG9zX3dlaWdodCIsIGYie3NjYWxlX3Bvc193ZWlnaHQ6MC4yZn0iKQogICAgY29udGV4dC5sb2dfYXJ0aWZhY3QoInNjYWxlX3Bvc193ZWlnaHQiLCBzdHIoc2NhbGVfcG9zX3dlaWdodCkpCgogICAgY2xhc3NfYmFsYW5jZV9tb2RlbC5zaG93KG91dHBhdGg9b3MucGF0aC5qb2luKGJhc2VfcGF0aCwgInBsb3RzL2ltYmFsYW5jZS5wbmciKSkKICAgIGNvbnRleHQubG9nX2FydGlmYWN0KFBsb3RBcnRpZmFjdCgiaW1iYWxhbmNlIiwgYm9keT1wbHQuZ2NmKCkpLCBsb2NhbF9wYXRoPSJwbG90cy9pbWJhbGFuY2UuaHRtbCIpCiAgICAKICAgICMgcGxvdCBmZWF0dXJlIGNvcnJlbGF0aW9uCiAgICBfZ2NmX2NsZWFyKHBsdCkKICAgIHRibGNvcnIgPSB0YWJsZS5jb3JyKCkKICAgIGF4ID0gcGx0LmF4ZXMoKQogICAgc25zLmhlYXRtYXAodGJsY29yciwgYXg9YXgsIGFubm90PUZhbHNlLCBjbWFwPXBsdC5jbS5SZWRzKQogICAgYXguc2V0X3RpdGxlKCJmZWF0dXJlcyBjb3JyZWxhdGlvbiIpCiAgICBwbHQuc2F2ZWZpZyhvcy5wYXRoLmpvaW4oYmFzZV9wYXRoLCAicGxvdHMvY29yci5wbmciKSkKICAgIGNvbnRleHQubG9nX2FydGlmYWN0KFBsb3RBcnRpZmFjdCgiY29ycmVsYXRpb24iLCAgYm9keT1wbHQuZ2NmKCkpLCBsb2NhbF9wYXRoPSJwbG90cy9jb3JyLmh0bWwiKQogICAgCiAgICAjIHBsb3QgaGlzdG9ncmFtCiAgICBfZ2NmX2NsZWFyKHBsdCkKICAgICIiIgogICAgYXggPSBwbHQuYXhlcygpCiAgICBheC5zZXRfeXRpY2tsYWJlbHMoW10pCiAgICBheC5zZXRfeHRpY2tsYWJlbHMoW10pCiAgICBmaWdhcnJheSA9IHRhYmxlLmhpc3QoYXg9YXgsIHlsYWJlbHNpemU9NSwgeGxhYmVsc2l6ZT01KQogICAgZm9yIHJvdyBpbiBmaWdhcnJheToKICAgICAgICBmb3IgZiBpbiByb3c6CiAgICAgICAgICAgIGYuc2V0X3RpdGxlKCIiKQogICAgYXguc2V0X3RpdGxlKCJmZWF0dXJlcyBoaXN0b2dyYW0iKQogICAgcGx0LnNhdmVmaWcob3MucGF0aC5qb2luKGJhc2VfcGF0aCwgInBsb3RzL2hpc3QucG5nIikpCiAgICBjb250ZXh0LmxvZ19hcnRpZmFjdChQbG90QXJ0aWZhY3QoImhpc3RvZ3JhbXMiLCAgYm9keT1wbHQuZ2NmKCkpLCBsb2NhbF9wYXRoPSJwbG90cy9oaXN0Lmh0bWwiKQogICAKICAgIF9nY2ZfY2xlYXIocGx0KQogICAgIiIi', 'commands': [], 'code_origin': 'describe.py'}}}
+      - |-
+        --out-path
+      - |-
+        v3io:///users/admin/mlrun/kfp/{{workflow.uid}}/
+      - |-
+        --image
+      - |-
+        docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp
+      - ""
+      "env":
+      - "name": |-
+          MLRUN_DBPATH
+        "value": |-
+          http://mlrun-api:8080
+      - "name": |-
+          V3IO_API
+        "value": |-
+          v3io-webapi.default-tenant.svc:8081
+      - "name": |-
+          V3IO_USERNAME
+        "value": |-
+          admin
+      - "name": |-
+          V3IO_ACCESS_KEY
+        "value": |-
+          24d076c0-f71b-498c-9ad4-f90260cc0af0
+      "image": |-
+        mlrun/mlrun:0.4.5
+      "volumeMounts":
+      - "mountPath": |-
+          /User
+        "name": |-
+          v3io
+    "inputs":
+      "parameters":
+      - "name": |-
+          clone-training_parquet_file
+    "name": |-
+      describe
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /mlpipeline-ui-metadata.json
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /mlpipeline-metrics.json
+    "volumes":
+    - "flexVolume":
+        "driver": |-
+          v3io/fuse
+        "options":
+          "accessKey": |-
+            24d076c0-f71b-498c-9ad4-f90260cc0af0
+          "container": |-
+            users
+          "subPath": |-
+            /admin
+      "name": |-
+        v3io
+  - "dag":
+      "tasks":
+      - "arguments":
+          "parameters":
+          - "name": |-
+              ontapClusterAdminPassword
+            "value": |-
+              {{inputs.parameters.ontapClusterAdminPassword}}
+          - "name": |-
+              ontapClusterAdminUsername
+            "value": |-
+              {{inputs.parameters.ontapClusterAdminUsername}}
+          - "name": |-
+              ontapClusterMgmtHostname
+            "value": |-
+              {{inputs.parameters.ontapClusterMgmtHostname}}
+          - "name": |-
+              sourceVolumeName
+            "value": |-
+              {{inputs.parameters.sourceVolumeName}}
+        "name": |-
+          clone
+        "template": |-
+          clone
+      - "arguments":
+          "parameters":
+          - "name": |-
+              clone-cloneVolumeDetails
+            "value": |-
+              {{tasks.clone.outputs.parameters.clone-cloneVolumeDetails}}
+        "dependencies":
+        - |-
+          clone
+        "name": |-
+          data-prep
+        "template": |-
+          data-prep
+      - "arguments":
+          "parameters":
+          - "name": |-
+              clone-cloneVolumeDetails
+            "value": |-
+              {{tasks.clone.outputs.parameters.clone-cloneVolumeDetails}}
+        "dependencies":
+        - |-
+          clone
+        - |-
+          xgb-train
+        "name": |-
+          deploy-model
+        "template": |-
+          deploy-model
+      - "arguments":
+          "parameters":
+          - "name": |-
+              clone-training_parquet_file
+            "value": |-
+              {{tasks.clone.outputs.parameters.clone-training_parquet_file}}
+        "dependencies":
+        - |-
+          clone
+        "name": |-
+          describe
+        "template": |-
+          describe
+      - "arguments":
+          "parameters":
+          - "name": |-
+              clone-cloneVolumeDetails
+            "value": |-
+              {{tasks.clone.outputs.parameters.clone-cloneVolumeDetails}}
+        "dependencies":
+        - |-
+          clone
+        - |-
+          data-prep
+        "name": |-
+          xgb-train
+        "template": |-
+          xgb-train
+    "inputs":
+      "parameters":
+      - "name": |-
+          ontapClusterAdminPassword
+      - "name": |-
+          ontapClusterAdminUsername
+      - "name": |-
+          ontapClusterMgmtHostname
+      - "name": |-
+          sourceVolumeName
+    "name": |-
+      netops-trainign-pipeline-with-netapp-volume-cloning
+  - "container":
+      "command":
+      - |-
+        python
+      - |-
+        -m
+      - |-
+        mlrun
+      - |-
+        run
+      - |-
+        --kfp
+      - |-
+        --from-env
+      - |-
+        --workflow
+      - |-
+        {{workflow.uid}}
+      - |-
+        --name
+      - |-
+        xgb_train
+      - |-
+        -p
+      - |-
+        FEATURES_TABLE=netops_features_parquet
+      - |-
+        -p
+      - |-
+        SAVE_TO=models
+      - |-
+        -p
+      - |-
+        metrics_table=netops_metrics_parquet
+      - |-
+        -p
+      - |-
+        FROM_TSDB=0
+      - |-
+        -p
+      - |-
+        PREDICTIONS_TABLE=netops_predictions
+      - |-
+        -p
+      - |-
+        TRAIN_ON_LAST=1d
+      - |-
+        -p
+      - |-
+        TRAIN_SIZE=0.7
+      - |-
+        -p
+      - |-
+        NUMBER_OF_SHARDS=4
+      - |-
+        -p
+      - |-
+        MODEL_FILENAME=netops.v3.model.pickle
+      - |-
+        -p
+      - |-
+        APP_DIR=/User/netops
+      - |-
+        -p
+      - |-
+        FUNCTION_NAME=netops-inference
+      - |-
+        -p
+      - |-
+        PROJECT_NAME=netops
+      - |-
+        -p
+      - |-
+        NETAPP_SIM=True
+      - |-
+        -p
+      - |-
+        NETAPP_MOUNT_PATH=/netapp
+      - |-
+        -p
+      - |-
+        NETAPP_PVC_CLAIM=basic
+      - |-
+        -p
+      - |-
+        IGZ_CONTAINER_PATH=/users/admin
+      - |-
+        -p
+      - |-
+        IGZ_MOUNT_PATH=/User
+      - |-
+        -i
+      - |-
+        DATA_DIR={{inputs.parameters.clone-cloneVolumeDetails}}
+      - |-
+        --handler
+      - |-
+        handler
+      - |-
+        --runtime
+      - |-
+        {'kind': 'job', 'metadata': {'name': 'training', 'tag': '', 'project': 'NetApp'}, 'spec': {'command': '', 'args': [], 'image': 'docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp', 'volumes': [{'flexVolume': {'driver': 'v3io/fuse', 'options': {'accessKey': '24d076c0-f71b-498c-9ad4-f90260cc0af0', 'container': 'users', 'subPath': '/admin'}}, 'name': 'v3io'}, {'name': 'nfs-pvc', 'persistentVolumeClaim': {'claimName': 'basic'}}], 'volume_mounts': [{'mountPath': '/User', 'name': 'v3io'}, {'mountPath': '/netapp', 'name': 'nfs-pvc'}], 'env': [{'name': 'V3IO_API', 'value': 'v3io-webapi.default-tenant.svc:8081'}, {'name': 'V3IO_USERNAME', 'value': 'admin'}, {'name': 'V3IO_ACCESS_KEY', 'value': '24d076c0-f71b-498c-9ad4-f90260cc0af0'}], 'description': '', 'build': {'functionSourceCode': 'IyBHZW5lcmF0ZWQgYnkgbnVjbGlvLmV4cG9ydC5OdWNsaW9FeHBvcnRlciBvbiAyMDIwLTAzLTE2IDE2OjQ3CgppbXBvcnQgb3MKaW1wb3J0IHRpbWUKaW1wb3J0IHlhbWwKaW1wb3J0IHBhbmRhcyBhcyBwZAppbXBvcnQgZGF0ZXRpbWUKaW1wb3J0IGl0ZXJ0b29scwppbXBvcnQgcGlja2xlCgppbXBvcnQgdjNpb19mcmFtZXMgYXMgdjNmCgppbXBvcnQgZGFzay5kYXRhZnJhbWUgYXMgZGQKZnJvbSBkYXNrLmRpc3RyaWJ1dGVkIGltcG9ydCBDbGllbnQKCmltcG9ydCBkYXNrX21sLm1vZGVsX3NlbGVjdGlvbiBhcyBkY3YKaW1wb3J0IHhnYm9vc3QgYXMgeGdiCmZyb20gbWxydW4gaW1wb3J0IGdldF9vcl9jcmVhdGVfY3R4CgptbHJ1bmNvbnRleHQgPSBnZXRfb3JfY3JlYXRlX2N0eCgndHJhaW5pbmcnKQoKCmZlYXR1cmVzX3RhYmxlPW9zLnBhdGguam9pbihzdHIobWxydW5jb250ZXh0LmdldF9pbnB1dCgnREFUQV9ESVInKSksbWxydW5jb250ZXh0LmdldF9wYXJhbSgnRkVBVFVSRVNfVEFCTEUnLCAnbmV0b3BzX2ZlYXR1cmVzJykpCm1scnVuY29udGV4dC5sb2dnZXIuaW5mbygiRkVBVFVSRVMgJXMiJWZlYXR1cmVzX3RhYmxlKQp0cmFpbl9vbl9sYXN0ID0gbWxydW5jb250ZXh0LmdldF9wYXJhbSgnVFJBSU5fT05fTEFTVCcsICc3ZCcpCgppc19mcm9tX3RzZGIgPSAoaW50KG1scnVuY29udGV4dC5nZXRfcGFyYW0oJ0ZST01fVFNEQicsIDApKSA9PSAxKQoKZmlsZXBhdGggPSBvcy5wYXRoLmpvaW4oZmVhdHVyZXNfdGFibGUpCmlmIG5vdCBvcy5wYXRoLmV4aXN0cyhmaWxlcGF0aCk6CiAgICBvcy5tYWtlZGlycyhmaWxlcGF0aCkKCnRyYWluX3NldF9zaXplID0gZmxvYXQobWxydW5jb250ZXh0LmdldF9wYXJhbSgnVFJBSU5fU0laRScsIDAuNykpCnRyYWluX3NpemUgPSBmbG9hdChtbHJ1bmNvbnRleHQuZ2V0X3BhcmFtKCdUUkFJTl9TSVpFJywgMC43KSkKCnNoYXJkcyA9IGludChtbHJ1bmNvbnRleHQuZ2V0X3BhcmFtKCdOVU1CRVJfT0ZfU0hBUkRTJywgNCkpCgptb2RlbF9maWxlcGF0aCA9IG9zLnBhdGguam9pbihtbHJ1bmNvbnRleHQuZ2V0X3BhcmFtKCdBUFBfRElSJyksbWxydW5jb250ZXh0LmdldF9wYXJhbSgnU0FWRV9UTycsICcvdjNpby9iaWdkYXRhL25ldG9wcy9tb2RlbHMnKSkKaWYgbm90IG9zLnBhdGguZXhpc3RzKG1vZGVsX2ZpbGVwYXRoKToKICAgIG9zLm1ha2VkaXJzKG1vZGVsX2ZpbGVwYXRoKQoKZGVmIGdldF9kYXRhX3BhcnF1ZXQoKToKICAgIG1wYXRoID0gW29zLnBhdGguam9pbihmZWF0dXJlc190YWJsZSwgZmlsZSkgZm9yIGZpbGUgaW4gb3MubGlzdGRpcihmZWF0dXJlc190YWJsZSldCiAgICAKICAgIGxhdGVzdCA9IG1heChtcGF0aCwga2V5PW9zLnBhdGguZ2V0bXRpbWUpCiAgICBwcmludChsYXRlc3QpCiAgICBjb250ZXh0LmxvZ2dlci5kZWJ1ZygnUmVhZGluZyBkYXRhIGZyb206ICVzJyVsYXRlc3QpCiAgICAKICAgIGRmID0gZGQucmVhZF9wYXJxdWV0KGxhdGVzdCkKICAgIAogICAgcmV0dXJuIGRmCgpkZWYgZ2V0X3RyYWluX3Rlc3Rfc2V0c19mcm9tX2RhdGEoZGY6IHBkLkRhdGFGcmFtZSk6CiAgICBkcm9wX2NvbHVtbnMgPSBbY29sIGZvciBjb2wgaW4gZGYuY29sdW1ucyBpZiAnaXNfZXJyb3InIGluIGNvbF0KICAgIFggPSBkZi5kcm9wKGRyb3BfY29sdW1ucywgYXhpcz0xKQogICAgeSA9IGRmLmxvY1s6LCAnaXNfZXJyb3InXQogICAgWF90cmFpbiwgWF90ZXN0LCB5X3RyYWluLCB5X3Rlc3QgPSBkY3YudHJhaW5fdGVzdF9zcGxpdChYLCB5LCB0cmFpbl9zaXplPXRyYWluX3NpemUsIHRlc3Rfc2l6ZT0xLXRyYWluX3NpemUpCiAgICByZXR1cm4gWF90cmFpbiwgWF90ZXN0LCB5X3RyYWluLCB5X3Rlc3QKCmRlZiBoYW5kbGVyKGNvbnRleHQpOgogICAgZGYgPSBnZXRfZGF0YV9wYXJxdWV0KCkgCgogICAgWF90cmFpbiwgWF90ZXN0LCB5X3RyYWluLCB5X3Rlc3QgPSBnZXRfdHJhaW5fdGVzdF9zZXRzX2Zyb21fZGF0YShkZikKICAgIAogICAgbW9kZWwgPSB4Z2IuWEdCQ2xhc3NpZmllcigpCiAgICBtb2RlbC5maXQoWF90cmFpbiwgeV90cmFpbikKICAgIAogICAgc2NvcmUgPSBtb2RlbC5zY29yZShYX3Rlc3QsIHlfdGVzdCkKICAgIGNvbnRleHQubG9nX3Jlc3VsdCgnYWNjdXJhY3knLHNjb3JlKQogICAgbW9kZWxfZmlsZSA9IG9zLnBhdGguam9pbihjb250ZXh0LmdldF9wYXJhbSgnQVBQX0RJUicpLGNvbnRleHQuZ2V0X3BhcmFtKCdTQVZFX1RPJyksY29udGV4dC5nZXRfcGFyYW0oJ01PREVMX0ZJTEVOQU1FJykpCiAgICBjb250ZXh0LmxvZ2dlci5pbmZvKCJTYXZlIG1vZGVsIHRvICVzIiVtb2RlbF9maWxlKQogICAgY29udGV4dC5sb2dfYXJ0aWZhY3QoJ3RyYWluZWRfbW9kZWwucGlja2xlJyxtb2RlbF9maWxlKQogICAgcGlja2xlLmR1bXAobW9kZWwsIG9wZW4obW9kZWxfZmlsZSwnd2InKSkKCg==', 'commands': [], 'code_origin': 'training.ipynb'}}}
+      - |-
+        --out-path
+      - |-
+        v3io:///users/admin/mlrun/kfp/{{workflow.uid}}/
+      - |-
+        --image
+      - |-
+        docker-registry.default-tenant.app.mdl0216.iguazio-cd1.com:80/iguazio/netapp
+      - ""
+      "env":
+      - "name": |-
+          MLRUN_DBPATH
+        "value": |-
+          http://mlrun-api:8080
+      - "name": |-
+          V3IO_API
+        "value": |-
+          v3io-webapi.default-tenant.svc:8081
+      - "name": |-
+          V3IO_USERNAME
+        "value": |-
+          admin
+      - "name": |-
+          V3IO_ACCESS_KEY
+        "value": |-
+          24d076c0-f71b-498c-9ad4-f90260cc0af0
+      "image": |-
+        mlrun/mlrun:0.4.5
+      "volumeMounts":
+      - "mountPath": |-
+          /User
+        "name": |-
+          v3io
+    "inputs":
+      "parameters":
+      - "name": |-
+          clone-cloneVolumeDetails
+    "name": |-
+      xgb-train
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /mlpipeline-ui-metadata.json
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /mlpipeline-metrics.json
+    "volumes":
+    - "flexVolume":
+        "driver": |-
+          v3io/fuse
+        "options":
+          "accessKey": |-
+            24d076c0-f71b-498c-9ad4-f90260cc0af0
+          "container": |-
+            users
+          "subPath": |-
+            /admin
+      "name": |-
+        v3io
