@@ -1,0 +1,69 @@
+metadata:
+  labels:
+    nuclio.io/project-name: netops
+  name: cleanup
+spec:
+  httpPort: 0
+  timeoutSeconds: 0
+  publish: false
+  platform: {}
+  handler: "cleanup:handler"
+  build:
+    functionSourceCode: aW1wb3J0IG9zCmltcG9ydCBzeXMKaW1wb3J0IHRpbWUKCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCmRlZiByZW1vdmUocGF0aCk6CiAgICB0cnk6CiAgICAgaWYgb3MucGF0aC5leGlzdHMocGF0aCk6CiAgICAgICAgb3MucmVtb3ZlKHBhdGgpCiAgICBleGNlcHQgT1NFcnJvcjoKICAgICAgICBwcmludCAoIlVuYWJsZSB0byByZW1vdmUgZmlsZTogJXMiJXBhdGgpCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCmRlZiBjbGVhbnVwKGNvbnRleHQsbnVtYmVyX29mX2hvdXJzLCBwYXRoKToKICAgICIiIgogICAgUmVtb3ZlcyBmaWxlcyBmcm9tIHRoZSBwYXNzZWQgaW4gcGF0aCB0aGF0IGFyZSBvbGRlciB0aGFuIG9yIGVxdWFsIAogICAgdG8gdGhlIG51bWJlcl9vZl9kYXlzCiAgICAiIiIKICAgIHRpbWVfaW5fc2VjcyA9IHRpbWUudGltZSgpIC0gKG51bWJlcl9vZl9ob3VycyAqIDYwKQogICAgZm9yIHJvb3QsIGRpcnMsIGZpbGVzIGluIG9zLndhbGsocGF0aCwgdG9wZG93bj1GYWxzZSk6CiAgICAgICAgZm9yIGZpbGVfIGluIGZpbGVzOgogICAgICAgICAgICBmdWxsX3BhdGggPSBvcy5wYXRoLmpvaW4ocm9vdCwgZmlsZV8pCiAgICAgICAgICAgIHN0YXQgPSBvcy5zdGF0KGZ1bGxfcGF0aCkKICAgICAgICAgICAgCiAgICAgICAgICAgIGlmIHN0YXQuc3RfbXRpbWUgPD0gdGltZV9pbl9zZWNzOgogICAgICAgICAgICAgICAgI2NvbnRleHQubG9nZ2VyLmluZm8oIlJlbW92aW5nICVzIiVmdWxsX3BhdGggKQogICAgICAgICAgICAgICAgcmVtb3ZlKGZ1bGxfcGF0aCkKICAgICAgICAgICAgZWxzZToKICAgICAgICAgICAgICAgIGNvbnRleHQubG9nZ2VyLmluZm8oIk5vdCBSZW1vdmluZyAlcyIlZnVsbF9wYXRoICkKICAgICAgICAgICAgCiAgICAgICAgI2lmIG5vdCBvcy5saXN0ZGlyKHJvb3QpOgogICAgICAgICMgICAgcmVtb3ZlKHJvb3QpCiAgICAgICAgICAgIApkZWYgaGFuZGxlcihjb250ZXh0LGV2ZW50KToKICAgIGNsZWFudXAoY29udGV4dCxpbnQob3MuZ2V0ZW52KCdIT1VSUycsMSkpLCBvcy5wYXRoLmpvaW4ob3MuZ2V0ZW52KCdORVRBUFBfTU9VTlRfUEFUSCcpLG9zLmdldGVudignRkVBVFVSRVNfVEFCTEUnKSApICkKICAgIHJldHVybiAnJw==
+    timestamp: 1584544590
+    runtimeAttributes:
+      repositories: []
+    noCleanup: false
+    noCache: false
+    offline: true
+    codeEntryType: sourceCode
+  env:
+    - type: value
+      name: NETAPP_MOUNT_PATH
+      value: /netapp
+    - type: value
+      name: FEATURES_TABLE
+      value: netops_features_parquet
+    - type: value
+      name: HOURS
+      value: "5"
+  resources: {}
+  imageHash: "1584544520014076221"
+  description: "Clean up features dir"
+  loggerSinks:
+    - level: debug
+  disable: false
+  alias: latest
+  volumes:
+    - volume:
+        persistentVolumeClaim:
+          readOnly: false
+          claimName: basic
+        name: netapp
+      volumeMount:
+        readOnly: false
+        mountPath: /netapp
+        name: netapp
+  runtime: "python:3.6"
+  scaleToZero:
+    scaleResources:
+      - threshold: 0
+        windowSize: 10m
+        metricName: nuclio_processor_handled_events_total
+  triggers:
+    hourlycleanup:
+      kind: cron
+      workerAvailabilityTimeoutMilliseconds: 0
+      disabled: false
+      maxWorkers: 1
+      attributes:
+        interval: 1h
+        maxBatchWaitMs: 0
+        numContainerWorkers: 0
+        maxBatchSize: 0
+        intervalMs: 0
+        pollingIntervalMs: 0
+        protocolVersion: 0
+        readBatchSize: 0
+        port: 0
+      class: ""
