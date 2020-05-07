@@ -15,7 +15,7 @@ then
 	pip install pyyaml --upgrade
 	pip install pandas
 	pip install pytimeparse
-	
+	pip install mlrun
 	# Igz DB
 	pip install v3io_frames --upgrade
 	
